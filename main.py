@@ -2,6 +2,7 @@ import asyncio
 import time
 
 from playwright.async_api import async_playwright
+from playwright.async_api import TimeoutError
 
 
 class WbParser:
@@ -35,11 +36,12 @@ class WbParser:
         await self.page2.goto(url=url)
         await self.__page_down_on_1000px(self.page2)
 
-        name_of_product = await self.page2.locator(".product-page__title").text_content()
-        price_of_product = await self.page2.inner_text(".price-block__wallet-price")
-        if price_of_product is not None:
+        try:
+            name_of_product = await self.page2.locator(".product-page__title").text_content()
+            price_of_product = await self.page2.inner_text(".price-block__wallet-price", TimeoutError=1000)
             print(name_of_product + " " + price_of_product)
-        else:
+        except:
+            name_of_product = await self.page2.locator(".product-page__title").text_content()
             price_of_product = await self.page2.inner_text(".price-block__final-price")
             print(name_of_product + " " + price_of_product)
 
