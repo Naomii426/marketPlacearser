@@ -1,5 +1,7 @@
 import asyncio
+import csv
 import time
+from struct import Items
 
 from playwright.async_api import async_playwright
 from playwright.async_api import TimeoutError
@@ -31,6 +33,15 @@ class WbParser:
                   }
         ''')
 
+    def __create_csv(self):
+        with open('marketPlaces.csv', mode='w', newline='', encoding='UTF-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Наименование товара', 'Цена', 'Рейтинг', 'Ссылка'])
+
+    def __save_csv(self):
+        with open('marketPlaces.csv', mode='w', newline='', encoding='UTF-8') as file:
+            writer = csv.writer(file)
+
     async def __get_info(self, url: str):
         self.page2 = await self.context.new_page()
         await self.page2.goto(url=url)
@@ -39,11 +50,16 @@ class WbParser:
         try:
             name_of_product = await self.page2.locator(".product-page__title").text_content()
             price_of_product = await self.page2.inner_text(".price-block__wallet-price", TimeoutError=1000)
-            print(name_of_product + " " + price_of_product)
+            rate_of_product = await self.page2.inner_text(".product-review__rating")
+
+            print(name_of_product + " " + price_of_product + " " + rate_of_product)
+            await self.page2.close()
         except:
             name_of_product = await self.page2.locator(".product-page__title").text_content()
             price_of_product = await self.page2.inner_text(".price-block__final-price")
-            print(name_of_product + " " + price_of_product)
+            rate_of_product = await self.page2.inner_text(".product-review__rating")
+            print(name_of_product + " " + price_of_product + " " + rate_of_product)
+            await self.page2.close()
 
     async def __get_links(self):
         await self.page.wait_for_selector(".product-card-list")
